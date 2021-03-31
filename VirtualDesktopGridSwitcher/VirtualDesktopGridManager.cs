@@ -21,17 +21,17 @@ namespace VirtualDesktopGridSwitcher {
 
         private Dictionary<VirtualDesktop, int> desktopIdLookup;
         private VirtualDesktop[] desktops;
-        private IntPtr[] activeWindows;
-        private IntPtr[] lastActiveBrowserWindows;
-        private IntPtr lastMoveOnNewWindowHwnd;
-        private int lastMoveOnNewWindowOpenedFromDesktop;
-        private DateTime lastMoveOnNewWindowOpenedTime = DateTime.MinValue;
+        //private IntPtr[] activeWindows;
+        //private IntPtr[] lastActiveBrowserWindows;
+        //private IntPtr lastMoveOnNewWindowHwnd;
+        //private int lastMoveOnNewWindowOpenedFromDesktop;
+        //private DateTime lastMoveOnNewWindowOpenedTime = DateTime.MinValue;
 
-        private IntPtr movingWindow = IntPtr.Zero;
-        private IntPtr activatingBrowserWindow = IntPtr.Zero;
+        //private IntPtr movingWindow = IntPtr.Zero;
+        //private IntPtr activatingBrowserWindow = IntPtr.Zero;
 
-        private WinAPI.WinEventDelegate foregroundWindowChangedDelegate;
-        private IntPtr fgWindowHook;
+        //private WinAPI.WinEventDelegate foregroundWindowChangedDelegate;
+        //private IntPtr fgWindowHook;
 
         Mutex callbackMutex = new Mutex();
 
@@ -40,8 +40,8 @@ namespace VirtualDesktopGridSwitcher {
             this.settings = settings;
             this.sysTrayProcess = sysTrayProcess;
 
-            foregroundWindowChangedDelegate = new WinAPI.WinEventDelegate(ForegroundWindowChanged);
-            fgWindowHook = WinAPI.SetWinEventHook(WinAPI.EVENT_SYSTEM_FOREGROUND, WinAPI.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, foregroundWindowChangedDelegate, 0, 0, WinAPI.WINEVENT_OUTOFCONTEXT);
+            //foregroundWindowChangedDelegate = new WinAPI.WinEventDelegate(ForegroundWindowChanged);
+            //fgWindowHook = WinAPI.SetWinEventHook(WinAPI.EVENT_SYSTEM_FOREGROUND, WinAPI.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero, foregroundWindowChangedDelegate, 0, 0, WinAPI.WINEVENT_OUTOFCONTEXT);
 
             Start();
         }
@@ -50,7 +50,7 @@ namespace VirtualDesktopGridSwitcher {
         {
             Stop();
 
-            WinAPI.UnhookWinEvent(fgWindowHook);
+            //WinAPI.UnhookWinEvent(fgWindowHook);
         }
 
         private bool Start() {
@@ -74,8 +74,8 @@ namespace VirtualDesktopGridSwitcher {
 
                 this._current = desktopIdLookup[VirtualDesktop.Current];
 
-                activeWindows = new IntPtr[desktops.Length];
-                lastActiveBrowserWindows = new IntPtr[desktops.Length];
+                //activeWindows = new IntPtr[desktops.Length];
+                //lastActiveBrowserWindows = new IntPtr[desktops.Length];
 
                 VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
             } catch { }
@@ -100,8 +100,8 @@ namespace VirtualDesktopGridSwitcher {
                 VirtualDesktop.CurrentChanged -= VirtualDesktop_CurrentChanged;
                 desktops = null;
                 desktopIdLookup = null;
-                activeWindows = null;
-                lastActiveBrowserWindows = null;
+                //activeWindows = null;
+                //lastActiveBrowserWindows = null;
             }
         }
 
@@ -125,14 +125,15 @@ namespace VirtualDesktopGridSwitcher {
                 this._current = newDesktop;
                 sysTrayProcess.ShowIconForDesktop(Current);
 
-                if (VirtualDesktop.Current == e.NewDesktop) {
+                /*if (VirtualDesktop.Current == e.NewDesktop) {
                     DoActivateBrowser(newDesktop);
                 } else {
                     Debug.WriteLine("Skipped OnDesktopChanged()");
-                }
+                }*/
             }
         }
 
+        /*
         private void DoActivateBrowser(int newDesktop) {
             var browserInfo = settings.GetBrowserToActivateInfo();
             if (movingWindow == IntPtr.Zero || !IsWindowDefaultBrowser(movingWindow, browserInfo)) {
@@ -156,13 +157,17 @@ namespace VirtualDesktopGridSwitcher {
 
             movingWindow = IntPtr.Zero;
         }
+        */
 
+        /*
         private class BrowserWinInfo {
             public IntPtr last;
             public IntPtr top;
             public IntPtr topOnDesktop;
         }
+        */
 
+        /*
         private bool IterateFindTopLevelBrowserOnCurrentDesktop(IntPtr hwnd, BrowserWinInfo browserWinInfo, SettingValues.BrowserInfo browserInfo) {
             if (hwnd == IntPtr.Zero) {
                 // None left to check
@@ -321,6 +326,7 @@ namespace VirtualDesktopGridSwitcher {
                 //ReleaseModifierKeys();
             }
         }
+        */
 
         private static string GetWindowTitle(IntPtr hwnd) {
             StringBuilder title = new StringBuilder(1024);
@@ -450,18 +456,18 @@ namespace VirtualDesktopGridSwitcher {
         }
 
         public void Switch(int index) {
-            var activeHwnd = WinAPI.GetForegroundWindow();
+            /*var activeHwnd = WinAPI.GetForegroundWindow();
             if (activeHwnd != activatingBrowserWindow) {
                 activeWindows[Current] = activeHwnd;
             }
             WinAPI.PostMessage(activeHwnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
-            Debug.WriteLine("Switch Active " + Current + " (" + activeWindows[Current] + ") to " + index + " (" + activeWindows[index] + ")");
+            Debug.WriteLine("Switch Active " + Current + " (" + activeWindows[Current] + ") to " + index + " (" + activeWindows[index] + ")");*/
             Current = index;
         }
 
         public void Move(int index) {
             var hwnd = WinAPI.GetForegroundWindow();
-            if (hwnd != IntPtr.Zero) {
+            /*if (hwnd != IntPtr.Zero) {
                 if (IsWindowDefaultBrowser(hwnd, settings.GetBrowserToActivateInfo())) {
                     for (int i = 0; i < lastActiveBrowserWindows.Length; ++i) {
                         if (lastActiveBrowserWindows[i] == hwnd) {
@@ -471,25 +477,27 @@ namespace VirtualDesktopGridSwitcher {
                     }
                 }
             }
+            */
 
             MoveWindow(hwnd, index);
         }
 
         private bool MoveWindow(IntPtr hwnd, int index) {
             if (hwnd != IntPtr.Zero) {
-                for (int i = 0; i < activeWindows.Length; ++i) {
+                /*for (int i = 0; i < activeWindows.Length; ++i) {
                     if (activeWindows[i] == hwnd) {
                         activeWindows[i] = IntPtr.Zero;
                     }
                 }
 
                 movingWindow = hwnd;
+                */
 
                 Debug.WriteLine("Move " + hwnd + " from " + Current + " to " + index);
 
                 try {
                     VirtualDesktopHelper.MoveToDesktop(hwnd, desktops[index]);
-                    activeWindows[index] = hwnd;
+                    //activeWindows[index] = hwnd;
                     if (hwnd != WinAPI.GetForegroundWindow()) {
                         WinAPI.SetForegroundWindow(hwnd);
                     }
