@@ -39,10 +39,10 @@ namespace WindowsDesktop.Interop
 		{
 			var searchTargets = new[]
 			{
-				this._assemblyDirectoryPath,
+				//this._assemblyDirectoryPath,
 				Environment.CurrentDirectory,
 				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-				_defaultAssemblyDirectoryPath,
+				//_defaultAssemblyDirectoryPath,
 			};
 
 			foreach (var searchPath in searchTargets)
