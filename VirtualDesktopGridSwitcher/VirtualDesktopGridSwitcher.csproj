@@ -61,6 +61,12 @@
     <Compile Include="AboutBox\AboutBox.designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="ClickSwitch\ClickSwitch.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClickSwitch\ClickSwitch.Designer.cs">
+      <DependentUpon>ClickSwitch.cs</DependentUpon>
+    </Compile>
     <Compile Include="ContextMenus.cs" />
     <Compile Include="Settings\SettingValues.cs" />
     <Compile Include="Settings\SettingsDialog.cs">
@@ -76,6 +82,9 @@
     <Compile Include="WinAPI.cs" />
     <EmbeddedResource Include="AboutBox\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClickSwitch\ClickSwitch.resx">
+      <DependentUpon>ClickSwitch.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Settings\SettingsDialog.resx">
       <DependentUpon>SettingsDialog.cs</DependentUpon>

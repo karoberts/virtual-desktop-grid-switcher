@@ -15,11 +15,13 @@ namespace VirtualDesktopGridSwitcher {
             Application.SetCompatibleTextRenderingDefault(false);
 
             var settings = SettingValues.Load();
-            using (SysTrayProcess sysTrayProcess = new SysTrayProcess(settings)) {
+            using (var sysTrayProcess = new SysTrayProcess(settings)) {
 
-                using (VirtualDesktopGridManager gridManager =
+                using (var gridManager =
                             new VirtualDesktopGridManager(sysTrayProcess, settings)) {
-                    
+
+                    sysTrayProcess.SetClickSwitchHandler(gridManager.Switch);
+
                     // Make sure the application runs!
                     Application.Run();
                 }
