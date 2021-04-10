@@ -62,6 +62,11 @@ namespace VirtualDesktopGridSwitcher.Settings {
             comboBoxAlwaysOnTopKey.SelectedItem = settings.AlwaysOnTopHotkey.Key;
 
             checkBoxActivateWebBrowser.Checked = settings.ActivateWebBrowserOnSwitch;
+
+            prevSizeRatio.Text = settings.PreviewWindowRatio.ToString();
+            prevPosOff.Text = settings.PreviewWindowLeftOffset.ToString();
+            prevHoverChk.Checked = !settings.PreviewWindowOnClick;
+            prevCloseDelay.Text = settings.PreviewWindowCloseDelay.ToString();
         }
 
         private bool SaveValues() {
@@ -122,6 +127,29 @@ namespace VirtualDesktopGridSwitcher.Settings {
 
             settings.ActivateWebBrowserOnSwitch = checkBoxActivateWebBrowser.Checked;
 
+            if (!decimal.TryParse(prevSizeRatio.Text, out var psr))
+            {
+                MessageBox.Show(this, "Preview Window Size Ratio must be a decimal");
+                return false;
+            }
+            settings.PreviewWindowRatio = psr;
+
+            if (!int.TryParse(prevPosOff.Text, out var ppo))
+            {
+                MessageBox.Show(this, "Preview Window offset must be an integer");
+                return false;
+            }
+            settings.PreviewWindowLeftOffset = ppo;
+
+            if (!decimal.TryParse(prevCloseDelay.Text, out var pcd))
+            {
+                MessageBox.Show(this, "Preview Window close delay must be a decimal");
+                return false;
+            }
+            settings.PreviewWindowCloseDelay = pcd;
+
+            settings.PreviewWindowOnClick = !prevHoverChk.Checked;
+
             if (!settings.ApplySettings()) {
                 MessageBox.Show(this, "Failed to apply settings", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
@@ -153,5 +181,6 @@ namespace VirtualDesktopGridSwitcher.Settings {
         private void comboBoxKey_KeyPress(object sender, KeyPressEventArgs e) {
             e.Handled = true;
         }
+
     }
 }

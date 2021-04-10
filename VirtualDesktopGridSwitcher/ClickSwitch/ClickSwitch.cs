@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VirtualDesktopGridSwitcher.Settings;
 
 namespace VirtualDesktopGridSwitcher.ClickSwitch
 {
@@ -15,16 +16,18 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
         private readonly Action<int> switchAction;
         private readonly Color highlightColor;
         private readonly Timer t;
+        private readonly SettingValues settings;
 
-        public ClickSwitch(Action<int> switchAction)
+        public ClickSwitch(Action<int> switchAction, SettingValues settings)
         {
             this.switchAction = i => { switchAction(i); this.Close(); };
+            this.settings = settings;
 
             var c = System.Drawing.SystemColors.Highlight;
             this.highlightColor = Color.FromArgb(Math.Min((int)(c.R * 1.3),255), Math.Min((int)(c.G * 1.3), 255), Math.Min((int)(c.B * 1.3),255));
 
             t = new Timer();
-            t.Interval = (int)TimeSpan.FromSeconds(5).TotalMilliseconds;
+            t.Interval = (int)TimeSpan.FromSeconds((double)settings.PreviewWindowCloseDelay).TotalMilliseconds;
             t.Tick += (o, e) => this.Close();
             t.Start();
 
@@ -62,8 +65,11 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
 
         private void ClickSwitch_Load(object sender, EventArgs e)
         {
+            this.Width = (int)(Screen.PrimaryScreen.Bounds.Width * settings.PreviewWindowRatio);
+            this.Height = (int)(Screen.PrimaryScreen.Bounds.Height * settings.PreviewWindowRatio);
+
             this.StartPosition = FormStartPosition.Manual;
-            int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - 134;
+            int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - settings.PreviewWindowLeftOffset;
             int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
             this.Bounds = new Rectangle(x, y, this.Width, this.Height);
         }

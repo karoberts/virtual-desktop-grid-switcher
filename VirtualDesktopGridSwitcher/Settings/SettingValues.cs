@@ -34,6 +34,12 @@ namespace VirtualDesktopGridSwitcher.Settings {
 
         public bool WrapAround = false;
 
+        // preview window stuff
+        public decimal PreviewWindowRatio { get; set; } = 0.05m;
+        public int PreviewWindowLeftOffset { get; set; } = 128;
+        public bool PreviewWindowOnClick { get; set; } = false;
+        public decimal PreviewWindowCloseDelay { get; set; } = 3;
+
         public Modifiers SwitchModifiers = 
             new Modifiers {
                 Ctrl = true, Win = false, Alt = true, Shift = false

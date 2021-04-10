@@ -16,10 +16,14 @@ namespace VirtualDesktopGridSwitcher {
 
         private ContextMenus contextMenu;
         private Action<int> switchAction;
+        private readonly SettingValues settings;
 
         private bool isShowingClickSwitch = false;
 
-        public SysTrayProcess(SettingValues settings) {
+        public SysTrayProcess(SettingValues settings)
+        {
+            this.settings = settings;
+
             notifyIcon = new NotifyIcon
             {
                 Visible = true,
@@ -37,20 +41,29 @@ namespace VirtualDesktopGridSwitcher {
 
         private void NotifyIcon_MouseMove(object sender, MouseEventArgs e)
         {
-            //Debug.WriteLine($"icon move {e.Location.X}");
-            if (isShowingClickSwitch)
+            if (settings.PreviewWindowOnClick)
                 return;
 
-            //Debug.WriteLine($"icon move {e.Location.X}, loading window");
-
-            isShowingClickSwitch = true;
-            var clickSwitch = new ClickSwitch.ClickSwitch(switchAction);
-            clickSwitch.ShowDialog();
-            isShowingClickSwitch = false;
+            ShowPreviewWindow();
         }
 
         private void NotifyIcon_Click(object sender, EventArgs e)
         {
+            if (!settings.PreviewWindowOnClick)
+                return;
+
+            ShowPreviewWindow();
+        }
+
+        private void ShowPreviewWindow()
+        {
+            if (isShowingClickSwitch)
+                return;
+
+            isShowingClickSwitch = true;
+            var clickSwitch = new ClickSwitch.ClickSwitch(switchAction, settings);
+            clickSwitch.ShowDialog();
+            isShowingClickSwitch = false;
         }
 
         public void SetClickSwitchHandler(Action<int> switchAction)
