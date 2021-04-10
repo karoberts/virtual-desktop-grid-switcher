@@ -63,7 +63,7 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
         private void ClickSwitch_Load(object sender, EventArgs e)
         {
             this.StartPosition = FormStartPosition.Manual;
-            int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - (this.Width / 2);
+            int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - 134;
             int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
             this.Bounds = new Rectangle(x, y, this.Width, this.Height);
         }
