@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,6 +23,8 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
         {
             this.switchAction = i => { switchAction(i); this.Close(); };
             this.settings = settings;
+
+            ClickSwitch_Load(null, null);
 
             var c = System.Drawing.SystemColors.Highlight;
             this.highlightColor = Color.FromArgb(Math.Min((int)(c.R * 1.3),255), Math.Min((int)(c.G * 1.3), 255), Math.Min((int)(c.B * 1.3),255));
@@ -69,14 +72,21 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             this.Height = (int)(Screen.PrimaryScreen.Bounds.Height * settings.PreviewWindowRatio);
 
             this.StartPosition = FormStartPosition.Manual;
+            this.WindowState = FormWindowState.Normal;
             int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - settings.PreviewWindowLeftOffset;
             int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
             this.Bounds = new Rectangle(x, y, this.Width, this.Height);
+            //MoveWindow(this.Handle, x, y, this.Width, this.Height, true);
+            //this.Location = new Point(x, y);
         }
+
+        /*
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall, ExactSpelling = true, SetLastError = true)]
+        internal static extern void MoveWindow(IntPtr hwnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
         private void ClickSwitch_MouseLeave(object sender, EventArgs e)
         {
             this.Close();
-        }
+        }*/
     }
 }

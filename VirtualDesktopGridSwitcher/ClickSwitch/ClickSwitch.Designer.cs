@@ -245,9 +245,8 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.ClickSwitch_Load);
-            this.MouseLeave += new System.EventHandler(this.ClickSwitch_MouseLeave);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
