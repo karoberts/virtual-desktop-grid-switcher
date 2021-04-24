@@ -283,7 +283,7 @@ namespace VirtualDesktopGridSwitcher {
         [DllImport("user32.dll")]
         public static extern short GetAsyncKeyState(int vKey);
 
-        public const uint WM_KILLFOCUS = 0x0008;
+        public const int WM_KILLFOCUS = 0x0008;
 
         [return: MarshalAs(UnmanagedType.Bool)]
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -299,5 +299,11 @@ namespace VirtualDesktopGridSwitcher {
 
         [DllImport("user32.dll")]
         public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, int wMsg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetActiveWindow();
     }
 }
