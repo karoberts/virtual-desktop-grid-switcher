@@ -394,8 +394,7 @@ namespace VirtualDesktopGridSwitcher {
                 if (desktops != null) 
                 {
                     // when switching, if a window remains active, it can "move with" you as you switch.
-                    // when using the click switch window, we kill focus for the active window
-                    // when using keyboard shortcuts, we kill focus for everything (active comes back as 0
+
                     var activeHwnd = WinAPI.GetActiveWindow();
                     //Debug.WriteLine($"active window = {activeHwnd}");
                     if (activeHwnd != IntPtr.Zero)
@@ -403,15 +402,13 @@ namespace VirtualDesktopGridSwitcher {
                         //Debug.WriteLine($"killing focus for active {activeHwnd}");
                         WinAPI.SendMessage(activeHwnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
                     }
-                    else
+
+                    WinAPI.EnumWindows((hWnd, lParam) =>
                     {
-                        WinAPI.EnumWindows((hWnd, lParam) =>
-                        {
-                            //Debug.WriteLine($"killing focus for {hWnd}");
-                            WinAPI.SendMessage(hWnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
-                            return true;
-                        }, IntPtr.Zero);
-                    }
+                        //Debug.WriteLine($"killing focus for {hWnd}");
+                        WinAPI.SendMessage(hWnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
+                        return true;
+                    }, IntPtr.Zero);
 
                     _current = value;
                     desktops[value].Switch();
