@@ -400,13 +400,13 @@ namespace VirtualDesktopGridSwitcher {
                     if (activeHwnd != IntPtr.Zero)
                     {
                         //Debug.WriteLine($"killing focus for active {activeHwnd}");
-                        WinAPI.SendMessage(activeHwnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
+                        WinAPI.PostMessage(activeHwnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
                     }
 
                     WinAPI.EnumWindows((hWnd, lParam) =>
                     {
                         //Debug.WriteLine($"killing focus for {hWnd}");
-                        WinAPI.SendMessage(hWnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
+                        WinAPI.PostMessage(hWnd, WinAPI.WM_KILLFOCUS, IntPtr.Zero, IntPtr.Zero);
                         return true;
                     }, IntPtr.Zero);
 
