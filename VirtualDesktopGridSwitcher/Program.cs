@@ -16,7 +16,7 @@ namespace VirtualDesktopGridSwitcher
         static void Main() 
         {
             // sometimes during startup it fails to init properly, so adding a slight delay
-            Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(1));
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
