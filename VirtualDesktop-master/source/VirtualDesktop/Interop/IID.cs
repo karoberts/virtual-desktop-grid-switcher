@@ -11,7 +11,7 @@ namespace WindowsDesktop.Interop
 {
 	public static class IID
 	{
-		private static readonly Regex _osBuildRegex = new Regex(@"v_(?<build>\d{5}?)");
+		private static readonly Regex _osBuildRegex = new(@"v_(?<build>\d{5}?)");
 
 		// ReSharper disable once InconsistentNaming
 		public static Dictionary<string, Guid> GetIIDs(string[] targets)
@@ -53,33 +53,25 @@ namespace WindowsDesktop.Interop
 		// ReSharper disable once InconsistentNaming
 		private static Dictionary<string, Guid> GetIIDsFromRegistry(string[] targets)
 		{
-			using (var interfaceKey = Registry.ClassesRoot.OpenSubKey("Interface"))
+			using var interfaceKey = Registry.ClassesRoot.OpenSubKey("Interface")
+				?? throw new Exception(@"Registry key '\HKEY_CLASSES_ROOT\Interface' is missing.");
+			var result = new Dictionary<string, Guid>();
+			var names = interfaceKey.GetSubKeyNames();
+
+			foreach (var name in names)
 			{
-				if (interfaceKey == null)
+				using var key = interfaceKey.OpenSubKey(name);
+				if (key?.GetValue("") is string value)
 				{
-					throw new Exception(@"Registry key '\HKEY_CLASSES_ROOT\Interface' is missing.");
-				}
-
-				var result = new Dictionary<string, Guid>();
-				var names = interfaceKey.GetSubKeyNames();
-
-				foreach (var name in names)
-				{
-					using (var key = interfaceKey.OpenSubKey(name))
+					var match = targets.FirstOrDefault(x => x == value);
+					if (match != null && Guid.TryParse(key.Name.Split('\\').Last(), out var guid))
 					{
-						if (key?.GetValue("") is string value)
-						{
-							var match = targets.FirstOrDefault(x => x == value);
-							if (match != null && Guid.TryParse(key.Name.Split('\\').Last(), out var guid))
-							{
-								result[match] = guid;
-							}
-						}
+						result[match] = guid;
 					}
 				}
-
-				return result;
 			}
+
+			return result;
 		}
 	}
 }

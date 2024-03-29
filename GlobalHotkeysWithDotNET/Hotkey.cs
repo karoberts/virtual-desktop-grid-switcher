@@ -107,7 +107,7 @@ namespace GlobalHotkeyWithDotNET
 
 			// Get an ID for the hotkey and increase current ID
 			this.id = Hotkey.currentID;
-			Hotkey.currentID = Hotkey.currentID + 1 % Hotkey.maximumID;
+			Hotkey.currentID = (Hotkey.currentID + 1) % Hotkey.maximumID;
 
 			// Translate modifier keys into unmanaged version
 			uint modifiers = (this.Alt ? Hotkey.MOD_ALT : 0) | (this.Control ? Hotkey.MOD_CONTROL : 0) |
@@ -184,11 +184,10 @@ namespace GlobalHotkeyWithDotNET
 		{
 			// Fire the event if we can
 			HandledEventArgs handledEventArgs = new HandledEventArgs(false);
-			if (this.Pressed != null)
-			{ this.Pressed(this, handledEventArgs); }
+            this.Pressed?.Invoke(this, handledEventArgs);
 
-			// Return whether we handled the event or not
-			return handledEventArgs.Handled;
+            // Return whether we handled the event or not
+            return handledEventArgs.Handled;
 		}
 
         public override string ToString()

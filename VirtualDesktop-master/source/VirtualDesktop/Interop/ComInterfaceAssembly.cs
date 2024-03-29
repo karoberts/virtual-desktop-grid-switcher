@@ -6,21 +6,15 @@ using System.Threading.Tasks;
 
 namespace WindowsDesktop.Interop
 {
-	internal class ComInterfaceAssembly
+	internal class ComInterfaceAssembly(Assembly compiledAssembly)
 	{
-		private readonly Dictionary<string, Type> _knownTypes = new Dictionary<string, Type>();
-		private readonly Assembly _compiledAssembly;
-
-		public ComInterfaceAssembly(Assembly compiledAssembly)
-		{
-			this._compiledAssembly = compiledAssembly;
-		}
+		private readonly Dictionary<string, Type> _knownTypes = [];
 
 		internal Type GetType(string typeName)
 		{
 			if (!this._knownTypes.TryGetValue(typeName, out var type))
 			{
-				type = this._knownTypes[typeName] = this._compiledAssembly
+				type = this._knownTypes[typeName] = compiledAssembly
 					.GetTypes()
 					.Single(x => x.Name.Split('.').Last() == typeName);
 			}

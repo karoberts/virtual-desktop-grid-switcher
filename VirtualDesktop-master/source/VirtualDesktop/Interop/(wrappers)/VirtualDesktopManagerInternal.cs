@@ -5,13 +5,9 @@ using System.Runtime.CompilerServices;
 namespace WindowsDesktop.Interop
 {
 	[ComInterfaceWrapper]
-	internal class VirtualDesktopManagerInternal : ComInterfaceWrapperBase
+	internal class VirtualDesktopManagerInternal(ComInterfaceAssembly assembly)
+		: ComInterfaceWrapperBase(assembly, service: CLSID.VirtualDesktopAPIUnknown)
 	{
-		public VirtualDesktopManagerInternal(ComInterfaceAssembly assembly)
-			: base(assembly, service: CLSID.VirtualDesktopAPIUnknown)
-		{
-		}
-
 		public void MoveViewToDesktop(ApplicationView pView, VirtualDesktop desktop)
 		{
 			this.Invoke(Args(pView.ComObject, desktop.ComObject));

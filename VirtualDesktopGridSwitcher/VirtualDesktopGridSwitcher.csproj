@@ -96,6 +96,7 @@
       <DependentUpon>ClickSwitch.cs</DependentUpon>
     </Compile>
     <Compile Include="ContextMenus.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Settings\SettingValues.cs" />
     <Compile Include="Settings\SettingsDialog.cs">
       <SubType>Form</SubType>

@@ -11,12 +11,12 @@ using VirtualDesktopGridSwitcher.Settings;
 namespace VirtualDesktopGridSwitcher {
     class SysTrayProcess : IDisposable {
 
-        private NotifyIcon notifyIcon;
-        private Icon[] desktopIcons;
-
-        private ContextMenus contextMenu;
-        private Action<int> switchAction;
+        private readonly NotifyIcon notifyIcon;
+        private readonly ContextMenus contextMenu;
         private readonly SettingValues settings;
+
+        private Icon[] desktopIcons;
+        private Action<int> switchAction;
 
         private bool isShowingClickSwitch = false;
 

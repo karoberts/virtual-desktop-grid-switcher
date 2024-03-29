@@ -5,11 +5,9 @@ using System.Linq;
 namespace WindowsDesktop.Interop
 {
 	[ComInterfaceWrapper]
-	internal class VirtualDesktopPinnedApps : ComInterfaceWrapperBase
+	internal class VirtualDesktopPinnedApps(ComInterfaceAssembly assembly)
+		: ComInterfaceWrapperBase(assembly, service: CLSID.VirtualDesktopPinnedApps)
 	{
-		public VirtualDesktopPinnedApps(ComInterfaceAssembly assembly)
-			: base(assembly, service: CLSID.VirtualDesktopPinnedApps) { }
-
 		public bool IsViewPinned(ApplicationView applicationView)
 		{
 			return this.Invoke<bool>(Args(applicationView.ComObject));

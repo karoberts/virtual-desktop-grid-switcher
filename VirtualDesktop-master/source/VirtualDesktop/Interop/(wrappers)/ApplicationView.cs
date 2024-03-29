@@ -7,11 +7,9 @@ using JetBrains.Annotations;
 namespace WindowsDesktop.Interop
 {
 	[ComInterfaceWrapper]
-	internal class ApplicationView : ComInterfaceWrapperBase
+	internal class ApplicationView(ComInterfaceAssembly assembly, object comObject, string comInterfaceName = null)
+		: ComInterfaceWrapperBase(assembly, comObject, comInterfaceName)
 	{
-		public ApplicationView(ComInterfaceAssembly assembly, object comObject, string comInterfaceName = null)
-			: base(assembly, comObject, comInterfaceName) { }
-
 		public string GetAppUserModelId()
 		{
 			var param = Args((string)null);

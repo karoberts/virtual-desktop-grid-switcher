@@ -11,7 +11,7 @@ namespace WindowsDesktop
 	{
 		#region Default instance
 
-		private static readonly Lazy<VirtualDesktopProvider> _default = new Lazy<VirtualDesktopProvider>(() => new VirtualDesktopProvider());
+		private static readonly Lazy<VirtualDesktopProvider> _default = new(() => new VirtualDesktopProvider());
 
 		public static VirtualDesktopProvider Default => _default.Value;
 

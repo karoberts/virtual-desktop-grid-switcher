@@ -11,21 +11,16 @@ using Microsoft.CSharp;
 
 namespace WindowsDesktop.Interop
 {
-	internal class ComInterfaceAssemblyProvider
+	internal class ComInterfaceAssemblyProvider(string assemblyDirectoryPath)
 	{
 		private const string _placeholderGuid = "00000000-0000-0000-0000-000000000000";
 		private const string _assemblyName = "VirtualDesktop.{0}.generated.dll";
 
-		private static readonly Regex _assemblyRegex = new Regex(@"VirtualDesktop\.(?<build>\d{5}?)(\.\w*|)\.dll");
+		private static readonly Regex _assemblyRegex = new(@"VirtualDesktop\.(?<build>\d{5}?)(\.\w*|)\.dll");
 		private static readonly string _defaultAssemblyDirectoryPath = Path.Combine(ProductInfo.LocalAppData.FullName, "assemblies");
-		private static readonly Version _requireVersion = new Version("1.0");
+		private static readonly Version _requireVersion = new("1.0");
 
-		private readonly string _assemblyDirectoryPath;
-		
-		public ComInterfaceAssemblyProvider(string assemblyDirectoryPath)
-		{
-			this._assemblyDirectoryPath = assemblyDirectoryPath ?? _defaultAssemblyDirectoryPath;
-		}
+		private readonly string _assemblyDirectoryPath = assemblyDirectoryPath ?? _defaultAssemblyDirectoryPath;
 
 		public Assembly GetAssembly()
 		{
@@ -85,11 +80,9 @@ namespace WindowsDesktop.Interop
 				var stream = executingAssembly.GetManifestResourceStream(assemblyInfo);
 				if (stream != null)
 				{
-					using (var reader = new StreamReader(stream, Encoding.UTF8))
-					{
-						var sourceCode = reader.ReadToEnd().Replace("{VERSION}", ProductInfo.OSBuild.ToString());
-						compileTargets.Add(sourceCode);
-					}
+					using var reader = new StreamReader(stream, Encoding.UTF8);
+					var sourceCode = reader.ReadToEnd().Replace("{VERSION}", ProductInfo.OSBuild.ToString());
+					compileTargets.Add(sourceCode);
 				}
 			}
 
@@ -104,14 +97,12 @@ namespace WindowsDesktop.Interop
 				var stream = executingAssembly.GetManifestResourceStream(name);
 				if (stream == null) continue;
 
-				using (var reader = new StreamReader(stream, Encoding.UTF8))
-				{
-					var sourceCode = reader.ReadToEnd().Replace(_placeholderGuid, iids[interfaceName].ToString());
-					compileTargets.Add(sourceCode);
-				}
+				using var reader = new StreamReader(stream, Encoding.UTF8);
+				var sourceCode = reader.ReadToEnd().Replace(_placeholderGuid, iids[interfaceName].ToString());
+				compileTargets.Add(sourceCode);
 			}
 
-			return this.Compile(compileTargets.ToArray());
+			return this.Compile([.. compileTargets]);
 		}
 
 		private Assembly Compile(string[] sources)
@@ -119,30 +110,28 @@ namespace WindowsDesktop.Interop
 			var dir = new DirectoryInfo(this._assemblyDirectoryPath);
 			if (!dir.Exists) dir.Create();
 
-			using (var provider = new CSharpCodeProvider())
+			using var provider = new CSharpCodeProvider();
+			var path = Path.Combine(dir.FullName, string.Format(_assemblyName, ProductInfo.OSBuild));
+			var cp = new CompilerParameters
 			{
-				var path = Path.Combine(dir.FullName, string.Format(_assemblyName, ProductInfo.OSBuild));
-				var cp = new CompilerParameters
-				{
-					OutputAssembly = path,
-					GenerateExecutable = false,
-					GenerateInMemory = false,
-				};
-				cp.ReferencedAssemblies.Add("System.dll");
-				cp.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
+				OutputAssembly = path,
+				GenerateExecutable = false,
+				GenerateInMemory = false,
+			};
+			cp.ReferencedAssemblies.Add("System.dll");
+			cp.ReferencedAssemblies.Add(Assembly.GetExecutingAssembly().Location);
 
-				var result = provider.CompileAssemblyFromSource(cp, sources);
-				if (result.Errors.Count > 0)
-				{
-					var nl = Environment.NewLine;
-					var message = $"Failed to compile COM interfaces assembly.{nl}{string.Join(nl, result.Errors.OfType<CompilerError>().Select(x => $"  {x}"))}";
+			var result = provider.CompileAssemblyFromSource(cp, sources);
+			if (result.Errors.Count > 0)
+			{
+				var nl = Environment.NewLine;
+				var message = $"Failed to compile COM interfaces assembly.{nl}{string.Join(nl, result.Errors.OfType<CompilerError>().Select(x => $"  {x}"))}";
 
-					throw new Exception(message);
-				}
-
-				System.Diagnostics.Debug.WriteLine($"Assembly compiled: {path}");
-				return result.CompiledAssembly;
+				throw new Exception(message);
 			}
+
+			System.Diagnostics.Debug.WriteLine($"Assembly compiled: {path}");
+			return result.CompiledAssembly;
 		}
 	}
 }

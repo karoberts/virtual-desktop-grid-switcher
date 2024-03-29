@@ -29,14 +29,17 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             var c = System.Drawing.SystemColors.Highlight;
             this.highlightColor = Color.FromArgb(Math.Min((int)(c.R * 1.3),255), Math.Min((int)(c.G * 1.3), 255), Math.Min((int)(c.B * 1.3),255));
 
-            t = new Timer();
-            t.Interval = (int)TimeSpan.FromSeconds((double)settings.PreviewWindowCloseDelay).TotalMilliseconds;
+            t = new Timer
+            {
+                Interval = (int)TimeSpan.FromSeconds((double)settings.PreviewWindowCloseDelay).TotalMilliseconds
+            };
             t.Tick += (o, e) => this.Close();
             t.Start();
 
             InitializeComponent();
         }
 
+#pragma warning disable IDE1006 // Naming Styles
         private void desktop1_Click(object sender, EventArgs e) => switchAction.Invoke(0);
         private void desktop2_Click(object sender, EventArgs e) => switchAction.Invoke(1);
         private void desktop3_Click(object sender, EventArgs e) => switchAction.Invoke(2);
@@ -65,6 +68,7 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
         private void desktop8_MouseLeave(object sender, EventArgs e) => desktop8.BackColor = SystemColors.Highlight;
         private void desktop9_MouseEnter(object sender, EventArgs e) => desktop9.BackColor = highlightColor;
         private void desktop9_MouseLeave(object sender, EventArgs e) => desktop9.BackColor = SystemColors.Highlight;
+#pragma warning restore IDE1006 // Naming Styles
 
         private void ClickSwitch_Load(object sender, EventArgs e)
         {
@@ -74,7 +78,7 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             this.StartPosition = FormStartPosition.Manual;
             this.WindowState = FormWindowState.Normal;
             int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - settings.PreviewWindowLeftOffset;
-            int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
+            int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height - settings.PreviewWindowBottomOffset;
             this.Bounds = new Rectangle(x, y, this.Width, this.Height);
             //MoveWindow(this.Handle, x, y, this.Width, this.Height, true);
             //this.Location = new Point(x, y);

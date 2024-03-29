@@ -7,11 +7,9 @@ using WindowsDesktop.Internal;
 namespace WindowsDesktop.Interop
 {
 	[ComInterfaceWrapper]
-	internal class VirtualDesktopNotificationService : ComInterfaceWrapperBase
+	internal class VirtualDesktopNotificationService(ComInterfaceAssembly assembly)
+		: ComInterfaceWrapperBase(assembly, service: CLSID.VirtualDesktopNotificationService)
 	{
-		public VirtualDesktopNotificationService(ComInterfaceAssembly assembly)
-			: base(assembly, service: CLSID.VirtualDesktopNotificationService) { }
-
 		public IDisposable Register(VirtualDesktopNotification pNotification)
 		{
 			var dwCookie = this.Invoke<uint>(Args(pNotification));

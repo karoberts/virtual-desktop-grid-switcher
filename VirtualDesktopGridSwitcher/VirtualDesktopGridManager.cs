@@ -12,12 +12,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 
-namespace VirtualDesktopGridSwitcher {
-
-    class VirtualDesktopGridManager: IDisposable {
-
-        private SettingValues settings;
-        private SysTrayProcess sysTrayProcess;
+namespace VirtualDesktopGridSwitcher
+{
+    class VirtualDesktopGridManager : IDisposable
+    {
+        private readonly SettingValues settings;
+        private readonly SysTrayProcess sysTrayProcess;
 
         private Dictionary<VirtualDesktop, int> desktopIdLookup;
         private VirtualDesktop[] desktops;
@@ -33,7 +33,7 @@ namespace VirtualDesktopGridSwitcher {
         //private WinAPI.WinEventDelegate foregroundWindowChangedDelegate;
         //private IntPtr fgWindowHook;
 
-        Mutex callbackMutex = new Mutex();
+        private readonly Mutex callbackMutex = new Mutex();
 
         public VirtualDesktopGridManager(SysTrayProcess sysTrayProcess, SettingValues settings)
         {
@@ -53,17 +53,21 @@ namespace VirtualDesktopGridSwitcher {
             //WinAPI.UnhookWinEvent(fgWindowHook);
         }
 
-        private bool Start() {
-            try {
+        private bool Start()
+        {
+            try
+            {
                 var curDesktops = VirtualDesktop.GetDesktops().ToList();
 
-                while (curDesktops.Count() > settings.Rows * settings.Columns) {
+                while (curDesktops.Count() > settings.Rows * settings.Columns)
+                {
                     var last = curDesktops.Last();
                     last.Remove();
                     curDesktops.Remove(last);
                 }
 
-                while (curDesktops.Count() < settings.Rows * settings.Columns) {
+                while (curDesktops.Count() < settings.Rows * settings.Columns)
+                {
                     curDesktops.Add(VirtualDesktop.Create());
                 }
 
@@ -78,25 +82,31 @@ namespace VirtualDesktopGridSwitcher {
                 //lastActiveBrowserWindows = new IntPtr[desktops.Length];
 
                 VirtualDesktop.CurrentChanged += VirtualDesktop_CurrentChanged;
-            } catch { }
+            }
+            catch { }
 
             sysTrayProcess.ShowIconForDesktop(Current);
 
             settings.Apply += Restart;
 
-            try {
+            try
+            {
                 RegisterHotKeys();
-            } catch {
+            }
+            catch
+            {
                 return false;
             }
 
             return true;
         }
 
-        private void Stop() {
+        private void Stop()
+        {
             settings.Apply -= Restart;
             UnregisterHotKeys();
-            if (desktops != null) {
+            if (desktops != null)
+            {
                 VirtualDesktop.CurrentChanged -= VirtualDesktop_CurrentChanged;
                 desktops = null;
                 desktopIdLookup = null;
@@ -110,18 +120,22 @@ namespace VirtualDesktopGridSwitcher {
             Stop();
             return Start();
         }
-        
-        public int DesktopCount { 
-            get {
+
+        public int DesktopCount
+        {
+            get
+            {
                 return settings.Rows * settings.Columns;
             }
         }
 
-        private void VirtualDesktop_CurrentChanged(object sender, VirtualDesktopChangedEventArgs e) {
+        private void VirtualDesktop_CurrentChanged(object sender, VirtualDesktopChangedEventArgs e)
+        {
             var newDesktop = desktopIdLookup[e.NewDesktop];
             Debug.WriteLine("Switched to " + newDesktop);
 
-            lock (callbackMutex) {
+            lock (callbackMutex)
+            {
                 this._current = newDesktop;
                 sysTrayProcess.ShowIconForDesktop(Current);
 
@@ -326,25 +340,27 @@ namespace VirtualDesktopGridSwitcher {
                 //ReleaseModifierKeys();
             }
         }
-        */
 
-        private static string GetWindowTitle(IntPtr hwnd) {
+        private static string GetWindowTitle(IntPtr hwnd)
+        {
             StringBuilder title = new StringBuilder(1024);
             WinAPI.GetWindowText(hwnd, title, title.Capacity);
             return title.ToString();
         }
 
-        private static string GetWindowExeName(IntPtr hwnd) {
-            uint pid = 0;
-            WinAPI.GetWindowThreadProcessId(hwnd, out pid);
+        private static string GetWindowExeName(IntPtr hwnd)
+        {
+            WinAPI.GetWindowThreadProcessId(hwnd, out uint pid);
 
             IntPtr pic = WinAPI.OpenProcess(WinAPI.ProcessAccessFlags.All, true, (int)pid);
-            if (pic == IntPtr.Zero) {
+            if (pic == IntPtr.Zero)
+            {
                 return null;
             }
 
             StringBuilder exeDevicePath = new StringBuilder(1024);
-            if (WinAPI.GetProcessImageFileName(pic, exeDevicePath, exeDevicePath.Capacity) == 0) { 
+            if (WinAPI.GetProcessImageFileName(pic, exeDevicePath, exeDevicePath.Capacity) == 0)
+            {
                 return null;
             }
             var exeName = Path.GetFileName(exeDevicePath.ToString());
@@ -352,34 +368,45 @@ namespace VirtualDesktopGridSwitcher {
             return exeName;
         }
 
-        private bool IsWindowDefaultBrowser(IntPtr hwnd, SettingValues.BrowserInfo browserInfo) {
+        private bool IsWindowDefaultBrowser(IntPtr hwnd, SettingValues.BrowserInfo browserInfo)
+        {
             var exename = GetWindowExeName(hwnd);
             return (browserInfo != null && exename != null && exename.ToUpper() == browserInfo.ExeName.ToUpper());
         }
 
-        private bool IsMoveOnNewWindowType(IntPtr hwnd) {
+        private bool IsMoveOnNewWindowType(IntPtr hwnd)
+        {
             var exename = GetWindowExeName(hwnd);
             return (
                 exename != null &&
                 settings.MoveOnNewWindowExeNames != null &&
                 settings.MoveOnNewWindowExeNames.Any(n => n.ToUpper() == exename.ToUpper()));
         }
+        */
 
-        private void ToggleWindowSticky(IntPtr hwnd) {
-            try {
-                if (VirtualDesktop.IsPinnedWindow(hwnd)) {
+        private void ToggleWindowSticky(IntPtr hwnd)
+        {
+            try
+            {
+                if (VirtualDesktop.IsPinnedWindow(hwnd))
+                {
                     VirtualDesktop.UnpinWindow(hwnd);
-                } else {
+                }
+                else
+                {
                     VirtualDesktop.PinWindow(hwnd);
                 }
-            } catch { }
+            }
+            catch { }
         }
 
-        private static bool IsWindowTopMost(IntPtr hWnd) {
+        private static bool IsWindowTopMost(IntPtr hWnd)
+        {
             return WinAPI.GetWindowLongPtr(hWnd, WinAPI.GWL_EXSTYLE).AND(WinAPI.WS_EX_TOPMOST) == WinAPI.WS_EX_TOPMOST;
         }
 
-        private void ToggleWindowAlwaysOnTop(IntPtr hwnd) {
+        private void ToggleWindowAlwaysOnTop(IntPtr hwnd)
+        {
             WinAPI.SetWindowPos(hwnd,
               IsWindowTopMost(hwnd) ? WinAPI.HWND_NOTOPMOST : WinAPI.HWND_TOPMOST,
               0, 0, 0, 0,
@@ -387,11 +414,12 @@ namespace VirtualDesktopGridSwitcher {
         }
 
         private int _current;
-        public int Current {
+        public int Current
+        {
             get => _current;
-            private set 
+            private set
             {
-                if (desktops != null) 
+                if (desktops != null)
                 {
                     // when switching, if a window remains active, it can "move with" you as you switch.
 
@@ -416,63 +444,96 @@ namespace VirtualDesktopGridSwitcher {
             }
         }
 
-        public int Left {
-            get {
-                if (ColumnOf(Current - 1) < ColumnOf(Current)) {
+        public int Left
+        {
+            get
+            {
+                if (ColumnOf(Current - 1) < ColumnOf(Current))
+                {
                     return Current - 1;
-                } else {
-                    if (settings.WrapAround) {
+                }
+                else
+                {
+                    if (settings.WrapAround)
+                    {
                         return Current + settings.Columns - 1;
-                    } else {
+                    }
+                    else
+                    {
                         return Current;
                     }
                 }
             }
         }
 
-        public int Right {
-            get {
-                if (ColumnOf(Current + 1) > ColumnOf(Current)) {
+        public int Right
+        {
+            get
+            {
+                if (ColumnOf(Current + 1) > ColumnOf(Current))
+                {
                     return Current + 1;
-                } else {
-                    if (settings.WrapAround) {
+                }
+                else
+                {
+                    if (settings.WrapAround)
+                    {
                         return Current - settings.Columns + 1;
-                    } else {
+                    }
+                    else
+                    {
                         return Current;
                     }
                 }
             }
         }
 
-        public int Up {
-            get {
-                if (RowOf(Current - settings.Columns) < RowOf(Current)) {
+        public int Up
+        {
+            get
+            {
+                if (RowOf(Current - settings.Columns) < RowOf(Current))
+                {
                     return Current - settings.Columns;
-                } else {
-                    if (settings.WrapAround) {
-                        return ((settings.Rows-1) * settings.Columns) + ColumnOf(Current);
-                    } else {
+                }
+                else
+                {
+                    if (settings.WrapAround)
+                    {
+                        return ((settings.Rows - 1) * settings.Columns) + ColumnOf(Current);
+                    }
+                    else
+                    {
                         return Current;
                     }
                 }
             }
         }
 
-        public int Down {
-            get {
-                if (RowOf(Current + settings.Columns) > RowOf(Current)) {
+        public int Down
+        {
+            get
+            {
+                if (RowOf(Current + settings.Columns) > RowOf(Current))
+                {
                     return Current + settings.Columns;
-                } else {
-                    if (settings.WrapAround) {
+                }
+                else
+                {
+                    if (settings.WrapAround)
+                    {
                         return ColumnOf(Current);
-                    } else {
+                    }
+                    else
+                    {
                         return Current;
                     }
                 }
             }
         }
 
-        public void Switch(int index) {
+        public void Switch(int index)
+        {
             /*var activeHwnd = WinAPI.GetForegroundWindow();
             if (activeHwnd != activatingBrowserWindow) {
                 activeWindows[Current] = activeHwnd;
@@ -482,7 +543,8 @@ namespace VirtualDesktopGridSwitcher {
             Current = index;
         }
 
-        public void Move(int index) {
+        public void Move(int index)
+        {
             var hwnd = WinAPI.GetForegroundWindow();
             /*if (hwnd != IntPtr.Zero) {
                 if (IsWindowDefaultBrowser(hwnd, settings.GetBrowserToActivateInfo())) {
@@ -499,8 +561,10 @@ namespace VirtualDesktopGridSwitcher {
             MoveWindow(hwnd, index);
         }
 
-        private bool MoveWindow(IntPtr hwnd, int index) {
-            if (hwnd != IntPtr.Zero) {
+        private bool MoveWindow(IntPtr hwnd, int index)
+        {
+            if (hwnd != IntPtr.Zero)
+            {
                 /*for (int i = 0; i < activeWindows.Length; ++i) {
                     if (activeWindows[i] == hwnd) {
                         activeWindows[i] = IntPtr.Zero;
@@ -512,14 +576,18 @@ namespace VirtualDesktopGridSwitcher {
 
                 Debug.WriteLine("Move " + hwnd + " from " + Current + " to " + index);
 
-                try {
+                try
+                {
                     VirtualDesktopHelper.MoveToDesktop(hwnd, desktops[index]);
                     //activeWindows[index] = hwnd;
-                    if (hwnd != WinAPI.GetForegroundWindow()) {
+                    if (hwnd != WinAPI.GetForegroundWindow())
+                    {
                         WinAPI.SetForegroundWindow(hwnd);
                     }
                     Current = index;
-                } catch {
+                }
+                catch
+                {
                     return false;
                 }
                 return true;
@@ -527,18 +595,21 @@ namespace VirtualDesktopGridSwitcher {
             return false;
         }
 
-        private int ColumnOf(int index) {
+        private int ColumnOf(int index)
+        {
             return ((index + settings.Columns) % settings.Columns);
         }
 
-        private int RowOf(int index) {
+        private int RowOf(int index)
+        {
             return ((index / settings.Columns) + settings.Rows) % settings.Rows;
         }
 
         private List<Hotkey> hotkeys;
 
-        private void RegisterHotKeys() {
-            
+        private void RegisterHotKeys()
+        {
+
             hotkeys = new List<Hotkey>();
 
             RegisterSwitchHotkey(Keys.Left, delegate { this.Switch(Left); });
@@ -551,11 +622,12 @@ namespace VirtualDesktopGridSwitcher {
             RegisterMoveHotkey(Keys.Up, delegate { Move(Up); });
             RegisterMoveHotkey(Keys.Down, delegate { Move(Down); });
 
-            for (int keyNumber = 1; keyNumber <= Math.Min(DesktopCount, settings.FKeysForNumbers ?  12 : 9) ; ++keyNumber) {
+            for (int keyNumber = 1; keyNumber <= Math.Min(DesktopCount, settings.FKeysForNumbers ? 12 : 9); ++keyNumber)
+            {
                 var desktopIndex = keyNumber - 1;
                 Keys keycode =
                     (Keys)Enum.Parse(typeof(Keys), (settings.FKeysForNumbers ? "F" : "D") + keyNumber.ToString());
-                
+
                 RegisterSwitchHotkey(keycode, delegate { this.Switch(desktopIndex); });
 
                 RegisterMoveHotkey(keycode, delegate { this.Move(desktopIndex); });
@@ -565,8 +637,10 @@ namespace VirtualDesktopGridSwitcher {
             RegisterToggleAlwaysOnTopHotKey();
         }
 
-        private void RegisterSwitchHotkey(Keys keycode, Action action) {
-            Hotkey hk = new Hotkey() {
+        private void RegisterSwitchHotkey(Keys keycode, Action action)
+        {
+            Hotkey hk = new Hotkey()
+            {
                 Control = settings.SwitchModifiers.Ctrl,
                 Windows = settings.SwitchModifiers.Win,
                 Alt = settings.SwitchModifiers.Alt,
@@ -574,9 +648,12 @@ namespace VirtualDesktopGridSwitcher {
                 KeyCode = keycode
             };
             hk.Pressed += delegate { action(); };
-            if (hk.Register(null)) {
+            if (hk.Register(null))
+            {
                 hotkeys.Add(hk);
-            } else {
+            }
+            else
+            {
                 MessageBox.Show("Failed to register switch hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
@@ -608,8 +685,10 @@ namespace VirtualDesktopGridSwitcher {
             }
         }
 
-        private void RegisterToggleStickyHotKey() {
-            Hotkey hk = new Hotkey() {
+        private void RegisterToggleStickyHotKey()
+        {
+            Hotkey hk = new Hotkey()
+            {
                 Control = settings.StickyWindowHotKey.Modifiers.Ctrl,
                 Windows = settings.StickyWindowHotKey.Modifiers.Win,
                 Alt = settings.StickyWindowHotKey.Modifiers.Alt,
@@ -617,9 +696,12 @@ namespace VirtualDesktopGridSwitcher {
                 KeyCode = settings.StickyWindowHotKey.Key
             };
             hk.Pressed += delegate { ToggleWindowSticky(WinAPI.GetForegroundWindow()); };
-            if (hk.Register(null)) {
+            if (hk.Register(null))
+            {
                 hotkeys.Add(hk);
-            } else {
+            }
+            else
+            {
                 MessageBox.Show("Failed to register toggle sticky window hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
@@ -627,8 +709,10 @@ namespace VirtualDesktopGridSwitcher {
             }
         }
 
-        private void RegisterToggleAlwaysOnTopHotKey() {
-            Hotkey hk = new Hotkey() {
+        private void RegisterToggleAlwaysOnTopHotKey()
+        {
+            Hotkey hk = new Hotkey()
+            {
                 Control = settings.AlwaysOnTopHotkey.Modifiers.Ctrl,
                 Windows = settings.AlwaysOnTopHotkey.Modifiers.Win,
                 Alt = settings.AlwaysOnTopHotkey.Modifiers.Alt,
@@ -636,9 +720,12 @@ namespace VirtualDesktopGridSwitcher {
                 KeyCode = settings.AlwaysOnTopHotkey.Key
             };
             hk.Pressed += delegate { ToggleWindowAlwaysOnTop(WinAPI.GetForegroundWindow()); };
-            if (hk.Register(null)) {
+            if (hk.Register(null))
+            {
                 hotkeys.Add(hk);
-            } else {
+            }
+            else
+            {
                 MessageBox.Show("Failed to register toggle window always on top hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
@@ -646,13 +733,15 @@ namespace VirtualDesktopGridSwitcher {
             }
         }
 
-        private void UnregisterHotKeys() {
+        private void UnregisterHotKeys()
+        {
             hotkeys.ForEach(hk => hk.Unregister());
             hotkeys = null;
         }
 
-
-        private void ReleaseModifierKeys() {
+        /*
+        private void ReleaseModifierKeys()
+        {
             const int WM_KEYUP = 0x101;
             const int VK_SHIFT = 0x10;
             const int VK_CONTROL = 0x11;
@@ -661,29 +750,36 @@ namespace VirtualDesktopGridSwitcher {
             const int VK_RWIN = 0x5C;
 
             var activeHWnd = WinAPI.GetForegroundWindow();
-            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_MENU))) {
+            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_MENU)))
+            {
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_MENU, (IntPtr)0xC0380001);
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_MENU, (IntPtr)0xC1380001);
             }
-            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_CONTROL))) {
+            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_CONTROL)))
+            {
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_CONTROL, (IntPtr)0xC01D0001);
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_CONTROL, (IntPtr)0xC11D0001);
             }
-            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_SHIFT))) {
+            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_SHIFT)))
+            {
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_SHIFT, (IntPtr)0xC02A0001);
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_SHIFT, (IntPtr)0xC0360001);
             }
-            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_LWIN))) {
+            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_LWIN)))
+            {
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_LWIN, (IntPtr)0xC15B0001);
             }
-            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_RWIN))) {
+            if (IsKeyPressed(WinAPI.GetAsyncKeyState(VK_RWIN)))
+            {
                 WinAPI.PostMessage(activeHWnd, WM_KEYUP, (IntPtr)VK_RWIN, (IntPtr)0xC15C0001);
             }
         }
 
-        private bool IsKeyPressed(short keystate) {
+        private bool IsKeyPressed(short keystate)
+        {
             return (keystate & 0x8000) != 0;
         }
+        */
     }
 
 }

@@ -55,7 +55,9 @@ namespace WindowsDesktop
 				Destroyed?.Invoke(sender, args);
 			}
 
+#pragma warning disable IDE0060 // Remove unused parameter
 			public static void RaiseApplicationViewChanged(object sender, IntPtr pView)
+#pragma warning restore IDE0060 // Remove unused parameter
 			{
 				ApplicationViewChanged?.Invoke(sender, EventArgs.Empty);
 			}
