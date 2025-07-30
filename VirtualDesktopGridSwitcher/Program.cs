@@ -18,6 +18,7 @@ namespace VirtualDesktopGridSwitcher
             // sometimes during startup it fails to init properly, so adding a slight delay
             Thread.Sleep(TimeSpan.FromSeconds(1));
 
+            SetProcessDPIAware();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -36,6 +37,8 @@ namespace VirtualDesktopGridSwitcher
 
             }
         }
-    
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetProcessDPIAware();
     }
 }

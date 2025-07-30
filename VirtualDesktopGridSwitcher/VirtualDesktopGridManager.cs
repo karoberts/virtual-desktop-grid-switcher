@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if !DEBUG
+#define WARN_ON_HOTKEY_FAILURE
+#endif
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -577,10 +581,12 @@ namespace VirtualDesktopGridSwitcher {
             if (hk.Register(null)) {
                 hotkeys.Add(hk);
             } else {
+#if WARN_ON_HOTKEY_FAILURE
                 MessageBox.Show("Failed to register switch hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning);
+#endif
             }
         }
 
@@ -601,10 +607,12 @@ namespace VirtualDesktopGridSwitcher {
             }
             else
             {
+#if WARN_ON_HOTKEY_FAILURE
                 MessageBox.Show("Failed to register move window hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning);
+#endif
             }
         }
 
@@ -620,10 +628,12 @@ namespace VirtualDesktopGridSwitcher {
             if (hk.Register(null)) {
                 hotkeys.Add(hk);
             } else {
+#if WARN_ON_HOTKEY_FAILURE
                 MessageBox.Show("Failed to register toggle sticky window hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning);
+#endif
             }
         }
 
@@ -639,10 +649,12 @@ namespace VirtualDesktopGridSwitcher {
             if (hk.Register(null)) {
                 hotkeys.Add(hk);
             } else {
+#if WARN_ON_HOTKEY_FAILURE
                 MessageBox.Show("Failed to register toggle window always on top hotkey for " + hk.KeyCode,
                                 "Warning",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning);
+#endif
             }
         }
 

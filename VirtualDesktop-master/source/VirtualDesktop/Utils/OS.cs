@@ -18,7 +18,7 @@ namespace WindowsDesktop.Utils
             get
             {
                 Version v = Environment.OSVersion.Version;
-                Version actual = new(v.Major, v.Minor, v.Build, int.Parse(Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion").GetValue("UBR").ToString()));
+                Version actual = new(v.Major, v.Minor, v.Build, int.Parse(Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion")!.GetValue("UBR")!.ToString()!));
                 return actual;
             }
         }

@@ -95,7 +95,7 @@ internal class ComInterfaceAssemblyBuilder
                 var sourceCode = reader
                     .ReadToEnd()
                     .Replace(_placeholderOsBuild, osBuild.ToString())
-                    .Replace(_placeholderAssemblyVersion, _requireVersion.ToString(3));
+                    .Replace(_placeholderAssemblyVersion, _requireVersion?.ToString(3));
                 compileTargets.Add(sourceCode);
             }
         }

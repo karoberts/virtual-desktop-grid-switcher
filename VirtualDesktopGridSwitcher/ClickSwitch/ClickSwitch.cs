@@ -24,6 +24,8 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             this.switchAction = i => { switchAction(i); this.Close(); };
             this.settings = settings;
 
+            InitializeComponent();
+
             ClickSwitch_Load(null, null);
 
             var c = System.Drawing.SystemColors.Highlight;
@@ -33,8 +35,6 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             t.Interval = (int)TimeSpan.FromSeconds((double)settings.PreviewWindowCloseDelay).TotalMilliseconds;
             t.Tick += (o, e) => this.Close();
             t.Start();
-
-            InitializeComponent();
         }
 
         private void desktop1_Click(object sender, EventArgs e) => switchAction.Invoke(0);
@@ -76,6 +76,7 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - settings.PreviewWindowLeftOffset;
             int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
             this.Bounds = new Rectangle(x, y, this.Width, this.Height);
+            this.Size = new Size(this.Width, this.Height);
             //MoveWindow(this.Handle, x, y, this.Width, this.Height, true);
             //this.Location = new Point(x, y);
         }

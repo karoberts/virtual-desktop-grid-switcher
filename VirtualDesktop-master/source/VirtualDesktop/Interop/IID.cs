@@ -36,19 +36,19 @@ internal static class IID
                 return null;
             })
             .Where(s => s != null)
-            .OrderByDescending(s => s.osBuild)
+            .OrderByDescending(s => s!.osBuild)
             .ToArray();
 
         // TODO: Select per major version first?
         // Find first prop with build version <= current OS version
         var selectedSettings = orderedProps.FirstOrDefault(p =>
-            p.osBuild <= OS.Build
+            p!.osBuild <= OS.Build
         );
         
         if (selectedSettings == null)
         {
-            var supportedBuilds = orderedProps.Select(v => v.osBuild).ToArray();
-            throw new ConfigurationException(
+            var supportedBuilds = orderedProps.Select(v => v!.osBuild).ToArray();
+            throw new ConfigurationErrorsException(
                 "Invalid application configuration. Unable to determine interop interfaces for " +
                 $"current OS Build: {OS.Build}. All configured OS Builds " +
                 $"have build version greater than current OS: {supportedBuilds}");
