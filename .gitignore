@@ -16,3 +16,4 @@ Thumbs.db
 syntax: regexp
 .vs
 packages
+*.user
