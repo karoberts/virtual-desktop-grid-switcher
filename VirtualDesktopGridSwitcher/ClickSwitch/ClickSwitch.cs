@@ -74,7 +74,7 @@ namespace VirtualDesktopGridSwitcher.ClickSwitch
             this.StartPosition = FormStartPosition.Manual;
             this.WindowState = FormWindowState.Normal;
             int x = Screen.PrimaryScreen.WorkingArea.Width - this.Width - settings.PreviewWindowLeftOffset;
-            int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
+            int y = Screen.PrimaryScreen.WorkingArea.Height - this.Height - settings.PreviewWindowBottomOffset;
             this.Bounds = new Rectangle(x, y, this.Width, this.Height);
             this.Size = new Size(this.Width, this.Height);
             //MoveWindow(this.Handle, x, y, this.Width, this.Height, true);

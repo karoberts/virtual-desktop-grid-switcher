@@ -37,6 +37,7 @@ namespace VirtualDesktopGridSwitcher.Settings {
         // preview window stuff
         public decimal PreviewWindowRatio { get; set; } = 0.05m;
         public int PreviewWindowLeftOffset { get; set; } = 128;
+        public int PreviewWindowBottomOffset { get; set; } = 0;
         public bool PreviewWindowOnClick { get; set; } = false;
         public decimal PreviewWindowCloseDelay { get; set; } = 3;
 

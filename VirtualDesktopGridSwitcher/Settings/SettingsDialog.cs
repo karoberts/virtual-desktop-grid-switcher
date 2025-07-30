@@ -136,10 +136,17 @@ namespace VirtualDesktopGridSwitcher.Settings {
 
             if (!int.TryParse(prevPosOff.Text, out var ppo))
             {
-                MessageBox.Show(this, "Preview Window offset must be an integer");
+                MessageBox.Show(this, "Preview Window Left offset must be an integer");
                 return false;
             }
             settings.PreviewWindowLeftOffset = ppo;
+
+            if (!int.TryParse(prevBotOff.Text, out var pbo))
+            {
+                MessageBox.Show(this, "Preview Window Bottom offset must be an integer");
+                return false;
+            }
+            settings.PreviewWindowBottomOffset = pbo;
 
             if (!decimal.TryParse(prevCloseDelay.Text, out var pcd))
             {
