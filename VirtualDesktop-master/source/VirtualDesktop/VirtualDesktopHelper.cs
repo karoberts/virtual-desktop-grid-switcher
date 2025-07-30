@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using WindowsDesktop.Interop;
 
 namespace WindowsDesktop
@@ -25,30 +26,18 @@ namespace WindowsDesktop
 		{
 			ThrowIfNotSupported();
 
-			return ComInterface.VirtualDesktopManager.IsWindowOnCurrentVirtualDesktop(hWnd);
+			return VirtualDesktop.IsCurrentVirtualDesktop(hWnd);
 		}
 
-		/// <summary>
-		/// Moves a window to the specified virtual desktop.
-		/// </summary>
-		/// <param name="hWnd">The handle of the window to be moved.</param>
-		/// <param name="virtualDesktop">The virtual desktop to move the window to.</param>
-		public static void MoveToDesktop(IntPtr hWnd, VirtualDesktop virtualDesktop)
-		{
-			ThrowIfNotSupported();
-
-			NativeMethods.GetWindowThreadProcessId(hWnd, out var processId);
-
-			if (Process.GetCurrentProcess().Id == processId)
-			{
-				var guid = virtualDesktop.Id;
-				ComInterface.VirtualDesktopManager.MoveWindowToDesktop(hWnd, ref guid);
-			}
-			else
-			{
-				var view = ComInterface.ApplicationViewCollection.GetViewForHwnd(hWnd);
-				ComInterface.VirtualDesktopManagerInternal.MoveViewToDesktop(view, virtualDesktop);
-			}
-		}
+        /// <summary>
+        /// Moves a window to the specified virtual desktop.
+        /// </summary>
+        /// <param name="hWnd">The handle of the window to be moved.</param>
+        /// <param name="virtualDesktop">The virtual desktop to move the window to.</param>
+        public static void MoveToDesktop(IntPtr hWnd, VirtualDesktop virtualDesktop)
+        {
+            ThrowIfNotSupported();
+            VirtualDesktop.MoveToDesktop(hWnd, virtualDesktop);
+        }
 	}
 }

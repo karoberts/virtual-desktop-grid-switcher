@@ -6,80 +6,97 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using WindowsDesktop.Properties;
 using Microsoft.Win32;
+using System.Globalization;
+using WindowsDesktop.Utils;
 
-namespace WindowsDesktop.Interop
+namespace WindowsDesktop.Interop;
+
+internal record OsBuildSettings(
+    Version osBuild,
+    SettingsProperty prop);
+
+internal static class IID
 {
-	public static class IID
-	{
-		private static readonly Regex _osBuildRegex = new Regex(@"v_(?<build>\d{5}?)");
+    private static readonly Regex _osBuildRegex = new(@"v_(?<build>\d+_\d+)");    
 
-		// ReSharper disable once InconsistentNaming
-		public static Dictionary<string, Guid> GetIIDs(string[] targets)
-		{
-			var known = new Dictionary<string, Guid>();
+    // ReSharper disable once InconsistentNaming
+    public static Dictionary<string, Guid> GetIIDs(string[] interfaceNames)
+    {
+        var result = new Dictionary<string, Guid>();
+        
+        // Order configuration props by build version
+        var orderedProps = Settings.Default.Properties.OfType<SettingsProperty>()
+            .Select(prop =>
+            {
+                if (Version.TryParse(OS.VersionPrefix + _osBuildRegex.Match(prop.Name).Groups["build"].ToString().Replace('_','.'), out var build))
+                {
+                    return new OsBuildSettings(build, prop);
+                }
 
-			foreach (var prop in Settings.Default.Properties.OfType<SettingsProperty>())
-			{
-				if (int.TryParse(_osBuildRegex.Match(prop.Name).Groups["build"]?.ToString(), out var build)
-					&& build == ProductInfo.OSBuild)
-				{
-					foreach (var str in (StringCollection)Settings.Default[prop.Name])
-					{
-						var pair = str.Split(',');
-						if (pair.Length != 2) continue;
+                return null;
+            })
+            .Where(s => s != null)
+            .OrderByDescending(s => s.osBuild)
+            .ToArray();
 
-						var @interface = pair[0];
-						if (targets.All(x => @interface != x) || known.ContainsKey(@interface)) continue;
+        // TODO: Select per major version first?
+        // Find first prop with build version <= current OS version
+        var selectedSettings = orderedProps.FirstOrDefault(p =>
+            p.osBuild <= OS.Build
+        );
+        
+        if (selectedSettings == null)
+        {
+            var supportedBuilds = orderedProps.Select(v => v.osBuild).ToArray();
+            throw new ConfigurationException(
+                "Invalid application configuration. Unable to determine interop interfaces for " +
+                $"current OS Build: {OS.Build}. All configured OS Builds " +
+                $"have build version greater than current OS: {supportedBuilds}");
+        }
 
-						if (!Guid.TryParse(pair[1], out var guid)) continue;
-						
-						known.Add(@interface, guid);
-					}
+        foreach (var str in (StringCollection)Settings.Default[selectedSettings.prop.Name])
+        {
+            if (str == null) continue;
 
-					break;
-				}
-			}
+            var pair = str.Split(',');
+            if (pair.Length != 2) continue;
+            if (interfaceNames.Contains(pair[0]) == false || result.ContainsKey(pair[0])) continue;
+            if (Guid.TryParse(pair[1], out var guid) == false) continue;
 
-			var except = targets.Except(known.Keys).ToArray();
-			if (except.Length > 0)
-			{
-				var fromRegistry = GetIIDsFromRegistry(except);
-				foreach (var kvp in fromRegistry) known.Add(kvp.Key, kvp.Value);
-			}
+            result.Add(pair[0], guid);
+        }
 
-			return known;
-		}
+        var except = interfaceNames.Except(result.Keys).ToArray();
+        if (except.Length > 0)
+        {
+            foreach (var (key, value) in GetIIDsFromRegistry(except)) result.Add(key, value);
+        }
 
-		// ReSharper disable once InconsistentNaming
-		private static Dictionary<string, Guid> GetIIDsFromRegistry(string[] targets)
-		{
-			using (var interfaceKey = Registry.ClassesRoot.OpenSubKey("Interface"))
-			{
-				if (interfaceKey == null)
-				{
-					throw new Exception(@"Registry key '\HKEY_CLASSES_ROOT\Interface' is missing.");
-				}
+        return result;
+    }
 
-				var result = new Dictionary<string, Guid>();
-				var names = interfaceKey.GetSubKeyNames();
+    // ReSharper disable once InconsistentNaming
+    private static Dictionary<string, Guid> GetIIDsFromRegistry(string[] targets)
+    {
+        using var interfaceKey = Registry.ClassesRoot.OpenSubKey("Interface")
+            ?? throw new Exception(@"Registry key '\HKEY_CLASSES_ROOT\Interface' is missing.");
 
-				foreach (var name in names)
-				{
-					using (var key = interfaceKey.OpenSubKey(name))
-					{
-						if (key?.GetValue("") is string value)
-						{
-							var match = targets.FirstOrDefault(x => x == value);
-							if (match != null && Guid.TryParse(key.Name.Split('\\').Last(), out var guid))
-							{
-								result[match] = guid;
-							}
-						}
-					}
-				}
+        var result = new Dictionary<string, Guid>();
 
-				return result;
-			}
-		}
-	}
+        foreach (var name in interfaceKey.GetSubKeyNames())
+        {
+            using var key = interfaceKey.OpenSubKey(name);
+
+            if (key?.GetValue("") is string value)
+            {
+                var match = targets.FirstOrDefault(x => x == value);
+                if (match != null && Guid.TryParse(key.Name.Split('\\').Last(), out var guid))
+                {
+                    result[match] = guid;
+                }
+            }
+        }
+
+        return result;
+    }
 }
